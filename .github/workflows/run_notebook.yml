@@ -39,4 +39,4 @@ jobs:
     - name: Run Script
       run: |
         # Replace with your script that uses Firebase and GCP
-        python Untitled1.ipynb
+        python Untitled1.py
