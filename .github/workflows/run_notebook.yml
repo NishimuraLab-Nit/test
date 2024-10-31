@@ -3,7 +3,7 @@ name: Run Firebase and GCP Tasks
 on:
   schedule:
     - cron: '12 0 * * *'  # 毎日0時に実行
-
+  workflow_dispatch:    # 手動実行用のトリガー
 jobs:
   run-tasks:
     runs-on: ubuntu-latest
