@@ -2,7 +2,7 @@ name: Run Firebase and GCP Tasks
 
 on: 
   schedule:
-    - cron: '50 2 * * *'
+    - cron: '15 3 * * *'
   workflow_dispatch:
 
 jobs:
