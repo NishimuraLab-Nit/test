@@ -47,7 +47,7 @@ def create_spreadsheet():
 
     # データ行を追加
     for student_id, student_data in data['Students'].items():  # Assuming 'Students' is the key
-        row = [student_id, student_data['start1'], student_data['finish1']]
+        row = [student_id, student_data['start'], student_data['finish']]
         values.append(row)
 
     body = {'values': values}
@@ -87,4 +87,3 @@ def create_spreadsheet():
 
 # スプレッドシートを作成して共有
 create_spreadsheet()
-
