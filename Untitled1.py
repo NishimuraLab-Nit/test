@@ -7,7 +7,7 @@ from googleapiclient.errors import HttpError
 
 # Firebase アプリ初期化
 if not firebase_admin._apps:
-    cred = credentials.Certificate('/tmp/firebase_service_account.json')
+    cred = credentials.Certificate('/content/test-51ebc-firebase-adminsdk-t5g9u-d35ff54294.json')
     firebase_admin.initialize_app(cred, {
         'databaseURL': 'https://test-51ebc-default-rtdb.firebaseio.com/'
     })
@@ -18,7 +18,7 @@ print(data)
 
 # Google Sheets APIのサービス初期化
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
-SERVICE_ACCOUNT_FILE = '/tmp/gcp_service_account.json'
+SERVICE_ACCOUNT_FILE = '/content/basic-advantage-438901-v1-9feb6c0f54b1.json'
 
 # サービスアカウントから資格情報取得
 creds = service_account.Credentials.from_service_account_file(
@@ -39,16 +39,34 @@ def create_spreadsheet():
     print(f'Spreadsheet ID: {sheet_id}')
 
     # データをスプレッドシートに追加
-    # Firebaseのデータ構造に合わせて値を調整
     values = []
     # ヘッダー行を追加
-    headers = ['student_id', 'start', 'finish']
+    headers = ['student_id']
     values.append(headers)
 
     # データ行を追加
-    for student_id, student_data in data['Students'].items():  # Assuming 'Students' is the key
-        row = [student_id, student_data['start'], student_data['finish']]
-        values.append(row)
+    for student_id, student_data in data['Students'].items():
+        row = [student_id]
+        for i in range(1, 11):  # 1から10までのセッションをチェック
+            start_key = f'start{i}'
+            finish_key = f'finish{i}'
+            start_value = student_data.get(start_key)
+            finish_value = student_data.get(finish_key)
+
+            if start_value:
+                if len(values[0]) < len(row) + 1:
+                    headers.append(start_key)
+                row.append(start_value)
+            if finish_value:
+                if len(values[0]) < len(row) + 1:
+                    headers.append(finish_key)
+                row.append(finish_value)
+
+        if len(row) > 1:  # 学生ID以外のデータがある場合のみ追加
+            values.append(row)
+
+    # ヘッダーの更新
+    values[0] = headers
 
     body = {'values': values}
     sheets_service.spreadsheets().values().update(
