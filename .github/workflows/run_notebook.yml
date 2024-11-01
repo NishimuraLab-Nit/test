@@ -2,7 +2,7 @@ name: Run Firebase and GCP Tasks
 
 on:
   schedule:
-    - cron: '25 10 * * *'  # 時に実行
+    - cron: '30 10 * * *'
   workflow_dispatch:    # 手動実行用のトリガー
 jobs:
   run-tasks:
