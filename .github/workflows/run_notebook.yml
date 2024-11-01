@@ -2,8 +2,7 @@ name: Run Firebase and GCP Tasks
 
 on:
   schedule:
-    - cron: '15 11 * * *'
-  workflow_dispatch:  # 手動実行用のトリガー
+    - cron: '17 11 * * *'
 
 jobs:
   run-tasks:
@@ -11,10 +10,10 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3  # 最新バージョンに更新
+      uses: actions/checkout@v3
 
     - name: Set up Python
-      uses: actions/setup-python@v3  # 最新バージョンに更新
+      uses: actions/setup-python@v3
       with:
         python-version: '3.x'
 
