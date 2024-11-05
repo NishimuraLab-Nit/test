@@ -14,7 +14,7 @@ if not firebase_admin._apps:
 
 # Google APIの認証設定
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']  # スプレッドシートAPIへのアクセス権
-SERVICE_ACCOUNT_FILE = '/content/test-51ebc-0513ababca21.json'  # サービスアカウントキーのファイルパス
+SERVICE_ACCOUNT_FILE = '/tmp/gcp_service_account.json'  # サービスアカウントキーのファイルパス
 
 # サービスアカウントキーを使ってGoogle APIに認証
 creds = service_account.Credentials.from_service_account_file(
