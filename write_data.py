@@ -6,7 +6,7 @@ from googleapiclient.discovery import build
 # Firebase アプリを初期化（未初期化の場合）
 if not firebase_admin._apps:
     # Firebaseのサービスアカウントキーを使って認証
-    cred = credentials.Certificate('/content/test-51ebc-firebase-adminsdk-t5g9u-341f9f2501.json')
+    cred = credentials.Certificate('/tmp/firebase_service_account.json')
     # Realtime DatabaseのURLを指定してアプリを初期化
     firebase_admin.initialize_app(cred, {
         'databaseURL': 'https://test-51ebc-default-rtdb.firebaseio.com/'
