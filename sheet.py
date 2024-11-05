@@ -16,7 +16,7 @@ if not firebase_admin._apps:
 # Google Sheets と Drive API のスコープを定義
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
 # サービスアカウントファイルのパス
-SERVICE_ACCOUNT_FILE = '/content/test-51ebc-0513ababca21.json'
+SERVICE_ACCOUNT_FILE = '/tmp/gcp_service_account.json'
 
 # サービスアカウントファイルから資格情報を取得
 creds = service_account.Credentials.from_service_account_file(
