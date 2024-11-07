@@ -39,4 +39,4 @@ jobs:
 
     - name: Run Script
       run: |
-        python Untitled1.py
+        python write_data.py
