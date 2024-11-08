@@ -8,25 +8,15 @@ import os
 
 # Firebase アプリを初期化（未初期化の場合）
 if not firebase_admin._apps:
-    # Firebaseのサービスアカウントキーを使って認証
     cred = credentials.Certificate('/tmp/firebase_service_account.json')
-    # Realtime DatabaseのURLを指定してアプリを初期化
     firebase_admin.initialize_app(cred, {
         'databaseURL': 'https://test-51ebc-default-rtdb.firebaseio.com/'
     })
 
-# Google APIの認証設定
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets']  # スプレッドシートAPIへのアクセス権
-SERVICE_ACCOUNT_FILE = '/tmp/gcp_service_account.json'  # サービスアカウントキーのファイルパス
-
-# サービスアカウントキーを使ってGoogle APIに認証
-creds = service_account.Credentials.from_service_account_file(
-    SERVICE_ACCOUNT_FILE, scopes=SCOPES
-)
-# Sheets APIのサービスオブジェクトを作成
-sheets_service = build('sheets', 'v4', credentials=creds)
-
-# ここでシート操作やFirebaseデータベース操作を追加できます
+# Google Sheets APIの設定
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+creds = ServiceAccountCredentials.from_json_keyfile_name('/tmp/gcp_service_account.json', scope)
+client = gspread.authorize(creds)
 
 def get_data_from_firebase(path):
     ref = db.reference(path)
