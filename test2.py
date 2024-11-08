@@ -1,10 +1,7 @@
-import datetime
-import json
 import firebase_admin
 from firebase_admin import credentials, db
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-import os
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
 
 # Firebase アプリを初期化（未初期化の場合）
 if not firebase_admin._apps:
@@ -25,6 +22,8 @@ creds = service_account.Credentials.from_service_account_file(
 )
 # Sheets APIのサービスオブジェクトを作成
 sheets_service = build('sheets', 'v4', credentials=creds)
+
+# ここでシート操作やFirebaseデータベース操作を追加できます
 
 def get_data_from_firebase(path):
     ref = db.reference(path)
