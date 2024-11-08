@@ -1,7 +1,10 @@
+import datetime
+import json
 import firebase_admin
 from firebase_admin import credentials, db
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+import os
 
 # Firebase アプリを初期化（未初期化の場合）
 if not firebase_admin._apps:
