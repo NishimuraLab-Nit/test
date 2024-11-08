@@ -3,7 +3,7 @@ import json
 import firebase_admin
 from firebase_admin import credentials, db
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2 import service_account
 import os
 
 # Firebase アプリを初期化（未初期化の場合）
