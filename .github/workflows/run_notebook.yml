@@ -34,4 +34,4 @@ jobs:
       env:
         GOOGLE_APPLICATION_CREDENTIALS: /tmp/firebase_service_account.json
       run: |
-        python write_time.py
+        python write_data.py
