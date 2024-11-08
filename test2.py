@@ -4,7 +4,17 @@ from firebase_admin import credentials, db
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-# Firebase and Google Sheets setup (assume this is set up correctly as before)
+# Initialize Firebase app
+if not firebase_admin._apps:
+    cred = credentials.Certificate('/tmp/firebase_service_account.json')
+    firebase_admin.initialize_app(cred, {
+        'databaseURL': 'https://test-51ebc-default-rtdb.firebaseio.com/'
+    })
+
+# Set up Google Sheets API
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+creds = ServiceAccountCredentials.from_json_keyfile_name('/tmp/gcp_service_account.json', scope)
+client = gspread.authorize(creds)
 
 def get_data_from_firebase(path):
     ref = db.reference(path)
@@ -30,7 +40,6 @@ def record_attendance(students_data, courses_data):
                 if not course:
                     continue
 
-                # Check if the classroom serial number matches
                 serial_number = attendance.get('entry1', {}).get('serial_number')
                 if serial_number == courses_data.get('class_room_id', [])[1].get('serial_number'):
                     sheet_id = item_data.get(student_number, {}).get('sheet_id')
