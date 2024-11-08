@@ -30,13 +30,8 @@ jobs:
         echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase_service_account.json
         export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase_service_account.json
 
-    - name: Configure Google Cloud
-      env:
-        GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      run: |
-        echo "$GCP_SERVICE_ACCOUNT" > /tmp/gcp_service_account.json
-        export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp_service_account.json
-
     - name: Run Script
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: /tmp/firebase_service_account.json
       run: |
         python test2.py
