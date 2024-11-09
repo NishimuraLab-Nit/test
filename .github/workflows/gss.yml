@@ -4,26 +4,28 @@ on:
   workflow_dispatch:
   
 jobs:
-  update-sheet:
+  run-script:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v2
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v2
       with:
-        python-version: '3.x'
+        python-version: '3.8'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install gspread oauth2client
+        pip install gspread oauth2client firebase-admin
 
     - name: Run script
       env:
-        GCP_CREDENTIALS: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+        FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        GOOGLE_CREDENTIALS: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       run: |
-        echo "$GCP_SERVICE_ACCOUNT" > credentials.json
-        python write_schedule.py
+        echo "$FIREBASE_SERVICE_ACCOUNT" > firebase-adminsdk.json
+        echo "$GCP_SERVICE_ACCOUNT" > google-credentials.json
+        python your_script.py
