@@ -1,3 +1,15 @@
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from datetime import datetime, timedelta
+import firebase_admin
+from firebase_admin import credentials, db
+
+# Firebaseの初期化
+cred = credentials.Certificate('firebase-adminsdk.json')
+firebase_admin.initialize_app(cred, {
+    'databaseURL': 'https://your-database-name.firebaseio.com/'
+})
+
 try:
     # Firebaseからsheet_idを取得
     ref = db.reference('Students/item/student_number/e19139/sheet_id')
