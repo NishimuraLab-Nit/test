@@ -23,7 +23,7 @@ jobs:
 
     - name: Run script
       env:
-        GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+        GCP_CREDENTIALS: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       run: |
-        echo "$GCP_CREDENTIALS" > credentials.json
-        python your_script.py
+        echo "$GCP_SERVICE_ACCOUNT" > credentials.json
+        python write_schedule.py
