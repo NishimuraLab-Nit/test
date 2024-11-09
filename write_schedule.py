@@ -7,13 +7,14 @@ from firebase_admin import credentials, db
 # Firebaseの初期化
 cred = credentials.Certificate('firebase-adminsdk.json')
 firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://your-database-name.firebaseio.com/'  # 正しいURLに変更
+    'databaseURL': 'https://test-51ebc-default-rtdb.firebaseio.com/'  # ここを確認
 })
 
 try:
     # Firebaseからsheet_idを取得
     ref_path = 'Students/item/student_number/e19139/sheet_id'
     print(f"Attempting to retrieve data from path: {ref_path}")
+    
     ref = db.reference(ref_path)
     sheet_id = ref.get()
     print(f"Retrieved sheet_id: {sheet_id}")
@@ -24,14 +25,7 @@ try:
     # Google Sheets APIの認証設定
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     
-    # JSONファイルの読み込みをデバッグ
-    try:
-        creds = ServiceAccountCredentials.from_json_keyfile_name('google-credentials.json', scope)
-        print("Credentials loaded successfully.")
-    except Exception as json_error:
-        print(f"Error loading JSON credentials: {json_error}")
-        raise
-
+    creds = ServiceAccountCredentials.from_json_keyfile_name('google-credentials.json', scope)
     client = gspread.authorize(creds)
 
     # スプレッドシートを開く
@@ -76,5 +70,7 @@ try:
 
     print("Googleスプレッドシートにデータを書き込みました。")
 
+except ValueError as ve:
+    print("Value error:", ve)
 except Exception as e:
     print("エラーが発生しました:", e)
