@@ -5,9 +5,9 @@ import firebase_admin
 from firebase_admin import credentials, db
 
 # Firebaseの初期化
-cred = credentials.Certificate('/tmp/firebase_service_account.json')
+cred = credentials.Certificate('firebase-adminsdk.json')
 firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://test-51ebc-default-rtdb.firebaseio.com/'
+    'databaseURL': 'https://your-database-name.firebaseio.com/'
 })
 
 # Firebaseからsheet_idを取得
@@ -16,7 +16,7 @@ sheet_id = ref.get()
 
 # Google Sheets APIの認証設定
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name('/tmp/gcp_service_account.json', scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name('google-credentials.json', scope)
 client = gspread.authorize(creds)
 
 # スプレッドシートを開く
