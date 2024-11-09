@@ -13,14 +13,9 @@ firebase_admin.initialize_app(cred, {
 try:
     # Firebaseからsheet_idを取得
     ref_path = 'Students/item/student_number/e19139/sheet_id'
-    print(f"Attempting to retrieve data from path: {ref_path}")
     
     ref = db.reference(ref_path)
     sheet_id = ref.get()
-    print(f"Retrieved sheet_id: {sheet_id}")
-
-    if not sheet_id:
-        raise ValueError("Sheet ID not found in Firebase database.")
 
     # Google Sheets APIの認証設定
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -44,7 +39,6 @@ try:
 
     # ヘッダー行に日付を書き込み
     worksheet.update('B1', [dates])
-    print("Dates written to sheet.")
 
     # 曜日ごとの科目を行に設定
     schedule = {
@@ -71,6 +65,4 @@ try:
     print("Googleスプレッドシートにデータを書き込みました。")
 
 except ValueError as ve:
-    print("Value error:", ve)
 except Exception as e:
-    print("エラーが発生しました:", e)
