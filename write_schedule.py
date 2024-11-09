@@ -7,7 +7,7 @@ from firebase_admin import credentials, db
 # Firebaseの初期化
 cred = credentials.Certificate('firebase-adminsdk.json')
 firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://your-actual-database-name.firebaseio.com/'  # ここを確認
+    'databaseURL': 'https://test-51ebc-default-rtdb.firebaseio.com/'  # ここを確認
 })
 
 
