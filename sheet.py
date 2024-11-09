@@ -29,14 +29,14 @@ drive_service = build('drive', 'v3', credentials=creds)
 
 def create_spreadsheet():
     try:
-        student_id = '240f8b85'
-        student_ref = db.reference(f'Students/{student_id}')
+        student_number = 'e19139'
+        student_ref = db.reference(f'Students/enrollment/student_number/{student_number}')
         student_data = student_ref.get()
 
         if student_data is None:
             raise ValueError("Student data not found in Firebase.")
 
-        student_number = student_data['student_number']
+        class_id = student_data['class_id'][0]
 
         spreadsheet = {
             'properties': {'title': student_number}
@@ -47,7 +47,7 @@ def create_spreadsheet():
 
         permissions = [
             {'type': 'user', 'role': 'reader', 'emailAddress': f'{student_number}@denki.numazu-ct.ac.jp'},
-            {'type': 'user', 'role': 'writer', 'emailAddress': 'naru.ibuki020301@gmail.com'}
+            {'type': 'user', 'role': 'writer', 'emailAddress': f'{student_number}@gmail.com'}
         ]
         for permission in permissions:
             drive_service.permissions().create(
@@ -55,9 +55,12 @@ def create_spreadsheet():
                 body=permission
             ).execute()
 
-        student_ref.update({'sheet_id': sheet_id})
+        item_ref = db.reference(f'Students/item/student_number/{student_number}')
+        item_ref.update({'sheet_id': sheet_id})
 
     except HttpError as error:
         print(f'API error occurred: {error}')
     except ValueError as e:
         print(e)
+
+create_spreadsheet()
