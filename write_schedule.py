@@ -35,7 +35,7 @@ start_date = datetime(2024, 11, 1)
 dates = [(start_date + timedelta(days=i)).strftime('%m月%d日') + f"({weekday_map[(start_date + timedelta(days=i)).strftime('%a')]})" for i in range(30)]
 
 # ヘッダー行に日付を書き込み
-worksheet.update('B1', [dates])
+worksheet.update(range_name='B1', values=[dates])
 print("Dates written to sheet.")
 
 # 曜日ごとの科目を行に設定
