@@ -26,8 +26,8 @@ jobs:
         FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
       run: |
-        echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase_service_account.json
-        echo "$GOOGLE_CREDENTIALS" > /tmp/gcp_service_account.json
+        echo "$FIREBASE_SERVICE_ACCOUNT" > firebase-adminsdk.json
+        echo "$GOOGLE_CREDENTIALS" > google-credentials.json
 
     - name: Run script
       run: |
