@@ -29,38 +29,35 @@ drive_service = build('drive', 'v3', credentials=creds)
 
 def create_spreadsheet():
     try:
-        # Firebase から student_number を取得
         student_id = '240f8b85'
         student_ref = db.reference(f'Students/{student_id}')
         student_data = student_ref.get()
+
+        if student_data is None:
+            raise ValueError("Student data not found in Firebase.")
+
         student_number = student_data['student_number']
 
-        # 新しいスプレッドシートを作成
         spreadsheet = {
-            'properties': {'title': student_number} # student_number をタイトルとして設定
+            'properties': {'title': student_number}
         }
-        # スプレッドシートを作成し、スプレッドシートIDを取得
         spreadsheet = sheets_service.spreadsheets().create(body=spreadsheet, fields='spreadsheetId').execute()
         sheet_id = spreadsheet.get('spreadsheetId')
-        print(f'Spreadsheet ID: {sheet_id}') # 作成されたスプレッドシートのIDを出力
+        print(f'Spreadsheet ID: {sheet_id}')
 
-        # サービスアカウント自身にも編集権限を与える
         permissions = [
             {'type': 'user', 'role': 'reader', 'emailAddress': f'{student_number}@denki.numazu-ct.ac.jp'},
-            {'type': 'user', 'role': 'writer', 'emailAddress': f'{student_number}@gmail.com'}
+            {'type': 'user', 'role': 'writer', 'emailAddress': 'naru.ibuki020301@gmail.com'}
         ]
-        # 各メールアドレスに権限を設定
         for permission in permissions:
             drive_service.permissions().create(
                 fileId=sheet_id,
                 body=permission
             ).execute()
 
-        # Firebase Realtime Database に sheet_id を保存
-        student_ref.update({'sheet_id': sheet_id}) # sheet_id を更新
+        student_ref.update({'sheet_id': sheet_id})
 
     except HttpError as error:
-        # エラーが発生した場合に出力
-        print(f'このようなエラーが発生しました {error}')
-
-create_spreadsheet()
+        print(f'API error occurred: {error}')
+    except ValueError as e:
+        print(e)
