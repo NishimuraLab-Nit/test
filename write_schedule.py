@@ -1,14 +1,26 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime, timedelta
+import firebase_admin
+from firebase_admin import credentials, db
+
+# Firebaseの初期化
+cred = credentials.Certificate('/tmp/firebase_service_account.json')
+firebase_admin.initialize_app(cred, {
+    'databaseURL': 'https://test-51ebc-default-rtdb.firebaseio.com/'
+})
+
+# Firebaseからsheet_idを取得
+ref = db.reference('Students/item/student_number/e19139/sheet_id')
+sheet_id = ref.get()
 
 # Google Sheets APIの認証設定
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name('your-credentials-file.json', scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name('/tmp/gcp_service_account.json', scope)
 client = gspread.authorize(creds)
 
 # スプレッドシートを開く
-spreadsheet = client.open('Your Spreadsheet Name')
+spreadsheet = client.open_by_key(sheet_id)
 worksheet = spreadsheet.sheet1
 
 # 曜日を日本語に対応
