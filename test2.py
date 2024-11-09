@@ -43,7 +43,6 @@ def record_attendance(students_data, courses_data):
         # 入室時刻の文字列を取得
         entry_time_str = attendance.get('entry1', {}).get('read_datetime')
         if not entry_time_str:
-            # 入室時刻がない場合は次へ
             continue
 
         # 入室時刻をdatetimeオブジェクトに変換
@@ -53,22 +52,13 @@ def record_attendance(students_data, courses_data):
 
         # 学生番号と登録されたクラスIDをループ
         for student_number, class_ids in enrollment_data.items():
+            if student_id not in student_number:
+                continue
+
             for class_id in class_ids.get('class_id', []):
                 # クラスIDに一致するコースを取得
                 course = next((c for c in courses_list if c and c.get('schedule', {}).get('class_room_id') == class_id), None)
                 if not course:
-                    # コースが見つからない場合は次へ
-                    continue
-
-                # シリアル番号を取得して一致を確認
-                serial_number = attendance.get('entry1', {}).get('serial_number')
-                if serial_number == courses_data.get('class_room_id', [])[1].get('serial_number'):
-                    # シートIDを取得
-                    sheet_id = item_data.get(student_number, {}).get('sheet_id')
-                    if sheet_id:
-                        # Google Sheetsに接続し、行を追加
-                        sheet = client.open_by_key(sheet_id).sheet1
-                        sheet.append_row([student_number, course['class_name'], "○"])
                     continue
 
                 # コースの曜日が入室日と一致するか確認
