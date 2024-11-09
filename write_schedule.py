@@ -1,20 +1,9 @@
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-from datetime import datetime, timedelta
-import firebase_admin
-from firebase_admin import credentials, db
-
-# Firebaseの初期化
-cred = credentials.Certificate('firebase-adminsdk.json')
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://your-database-name.firebaseio.com/'
-})
-
 try:
     # Firebaseからsheet_idを取得
     ref = db.reference('Students/item/student_number/e19139/sheet_id')
     sheet_id = ref.get()
-    
+    print(f"Retrieved sheet_id: {sheet_id}")
+
     if not sheet_id:
         raise ValueError("Sheet ID not found in Firebase database.")
 
@@ -39,6 +28,7 @@ try:
 
     # ヘッダー行に日付を書き込み
     worksheet.update('B1', [dates])
+    print("Dates written to sheet.")
 
     # 曜日ごとの科目を行に設定
     schedule = {
@@ -64,7 +54,5 @@ try:
 
     print("Googleスプレッドシートにデータを書き込みました。")
 
-except firebase_admin.exceptions.NotFoundError as e:
-    print("Firebaseでデータが見つかりません:", e)
 except Exception as e:
     print("エラーが発生しました:", e)
