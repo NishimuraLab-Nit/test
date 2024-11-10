@@ -4,14 +4,14 @@ from datetime import datetime, timedelta
 from firebase_admin import credentials, db, initialize_app
 
 # Initialize Firebase
-cred = credentials.Certificate("/Users/nishimura_lab/Desktop/Noname/test-51ebc-firebase-adminsdk-t5g9u-8c04279c5c.json")
+cred = credentials.Certificate("firebase-adminsdk.json")
 initialize_app(cred, {
     'databaseURL': 'https://test-51ebc-default-rtdb.firebaseio.com/'
 })
 
 # Set up Google Sheets API credentials
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-creds = Credentials.from_service_account_file("/Users/nishimura_lab/Desktop/Noname/test-51ebc-56a458435c36.json", scopes=SCOPES)
+creds = Credentials.from_service_account_file(" google-credentials.json", scopes=SCOPES)
 service_sheets = build('sheets', 'v4', credentials=creds)
 
 # Firebaseからsheet_idを取得
