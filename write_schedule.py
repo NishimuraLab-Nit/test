@@ -84,7 +84,7 @@ def main():
         # 列を追加
         {"appendDimension": {"sheetId": 0, "dimension": "COLUMNS", "length": 30}},
         # 列幅と行の高さを設定
-        create_dimension_request(0, "COLUMNS", 0, 1, 70),
+        create_dimension_request(0, "COLUMNS", 0, 1, 100),
         create_dimension_request(0, "COLUMNS", 1, 32, 35),
         create_dimension_request(0, "ROWS", 0, 1, 120),
         # セルの中央揃え
