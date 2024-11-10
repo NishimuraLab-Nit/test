@@ -75,8 +75,8 @@ def main():
 
     # 履修している教科名のリストを作成
     class_names = [
-        courses[class_id]['class_name']
-        for class_id in student_class_ids if class_id and courses.get(class_id)
+        courses[i]['class_name']
+        for i in student_class_ids if i and i < len(courses) and courses[i]
     ]
 
     # 変更リクエストのリストを作成
