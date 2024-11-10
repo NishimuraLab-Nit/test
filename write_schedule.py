@@ -82,6 +82,7 @@ def main():
 
     requests.append(create_cell_update_request(0, 0, 0, "教科"))
 
+    # Insert class names starting from A2
     for i, class_name in enumerate(class_names):
         requests.append(create_cell_update_request(0, i + 1, 0, class_name))
 
