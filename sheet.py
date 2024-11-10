@@ -47,7 +47,7 @@ def create_spreadsheet():
 
         permissions = [
             {'type': 'user', 'role': 'reader', 'emailAddress': f'{student_number}@denki.numazu-ct.ac.jp'},
-            {'type': 'user', 'role': 'writer', 'emailAddress': f'{student_number}@gmail.com'}
+            {'type': 'user', 'role': 'writer', 'emailAddress': 'naru.ibuki020301@gmail.com'}
         ]
         for permission in permissions:
             drive_service.permissions().create(
