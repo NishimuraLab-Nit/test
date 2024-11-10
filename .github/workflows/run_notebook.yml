@@ -1,4 +1,4 @@
-name: Run Firebase and GCP Tasks
+name: Write Attendance
 
 on: 
   schedule:
