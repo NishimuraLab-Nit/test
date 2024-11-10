@@ -11,7 +11,7 @@ initialize_app(cred, {
 
 # Set up Google Sheets API credentials
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-creds = Credentials.from_service_account_file(" google-credentials.json", scopes=SCOPES)
+creds = Credentials.from_service_account_file("google-credentials.json", scopes=SCOPES)
 service_sheets = build('sheets', 'v4', credentials=creds)
 
 # Firebaseからsheet_idを取得
