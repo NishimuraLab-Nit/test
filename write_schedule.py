@@ -122,8 +122,8 @@ def main():
             requests.append(create_conditional_formatting_request(0, 0, end_row, i + 1, i + 2, {"red": 1.0, "green": 0.8, "blue": 0.8}, f'=ISNUMBER(SEARCH("日", INDIRECT(ADDRESS(1, COLUMN()))))'))
 
     # シートの範囲外のセルを黒にする
-    requests.append(create_black_background_request(0, 25, 1000, 0, 32))
-    requests.append(create_black_background_request(0, 0, 25, 32, 1000))
+    requests.append(create_black_background_request(0, 25, 1000, 0, 1000))
+    requests.append(create_black_background_request(0, 0, 1000, 32, 1000))
 
     # Google Sheets APIにバッチリクエストを送信
     service_sheets.spreadsheets().batchUpdate(spreadsheetId=sheet_id, body={'requests': requests}).execute()
