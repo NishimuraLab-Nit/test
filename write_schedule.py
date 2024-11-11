@@ -62,7 +62,7 @@ def create_dimension_request(sheet_id, dimension, start_index, end_index, pixel_
         }
     }
 
-def create_conditional_formatting_request(sheet_id, start_col, end_col, color, formula):
+def create_conditional_formatting_request(sheet_id, start_col, end_col, color, text):
     # 条件付き書式のリクエストを作成
     return {
         "addConditionalFormatRule": {
@@ -70,18 +70,18 @@ def create_conditional_formatting_request(sheet_id, start_col, end_col, color, f
                 "ranges": [
                     {
                         "sheetId": sheet_id,
-                        "startRowIndex": 1,  # 適用開始行（データ部分）
-                        "endRowIndex": 1000,  # 適用終了行
+                        "startRowIndex": 0,
+                        "endRowIndex": 1,
                         "startColumnIndex": start_col,
                         "endColumnIndex": end_col
                     }
                 ],
                 "booleanRule": {
                     "condition": {
-                        "type": "CUSTOM_FORMULA",
+                        "type": "TEXT_CONTAINS",
                         "values": [
                             {
-                                "userEnteredValue": formula
+                                "userEnteredValue": text
                             }
                         ]
                     },
@@ -116,7 +116,7 @@ def main():
         # 列を追加
         {"appendDimension": {"sheetId": 0, "dimension": "COLUMNS", "length": 30}},
         # 列幅と行の高さを設定
-        create_dimension_request(0, "COLUMNS", 0, 1, 70),
+        create_dimension_request(0, "COLUMNS", 0, 1, 100),
         create_dimension_request(0, "COLUMNS", 1, 32, 35),
         create_dimension_request(0, "ROWS", 0, 1, 120),
         # セルの中央揃え
