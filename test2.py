@@ -20,52 +20,39 @@ def get_data_from_firebase(path):
     ref = db.reference(path)
     return ref.get()
 
-def record_attendance(students_data, courses_data):
-    attendance_data = students_data.get('attendance', {}).get('students_id', {})
-    enrollment_data = students_data.get('enrollment', {}).get('student_number', {})
-    item_data = students_data.get('item', {}).get('student_number', {})
-    courses_list = courses_data.get('course_id', [])
+# Step 3: Fetch data from Firebase
+students_data = db.reference("Students").get()
+courses_data = db.reference("Courses").get()
 
-    for student_id, attendance in attendance_data.items():
-        entry_time_str = attendance.get('entry1', {}).get('read_datetime')
-        if not entry_time_str:
-            continue
+# Step 4: Helper function to match attendance with class schedule
+def match_entry_with_schedule(entry_time_str, student_enrollments, courses_data):
+    entry_time = datetime.strptime(entry_time_str, "%Y-%m-%d %H:%M:%S")
+    for course_id in student_enrollments:
+        if course_id and course_id in courses_data["course_id"]:
+            course_info = courses_data["course_id"][course_id]
+            schedule = course_info.get("schedule", {})
+            # Check if the day and time match
+            scheduled_time = schedule.get("time", "")
+            if scheduled_time:
+                start_time_str, _ = scheduled_time.split('-')
+                scheduled_time_dt = datetime.strptime(start_time_str, "%H:%M")
+                # Compare entry date with schedule's start time (date ignored)
+                if (entry_time.hour == scheduled_time_dt.hour and 
+                    entry_time.minute == scheduled_time_dt.minute):
+                    return True
+    return False
 
-        entry_time = datetime.datetime.strptime(entry_time_str, "%Y-%m-%d %H:%M:%S")
-        entry_day = entry_time.strftime("%A")
-        entry_minutes = entry_time.hour * 60 + entry_time.minute
+# Step 5: Process each student’s attendance and check if they match the schedule
+for student_id, student_attendance in students_data["attendance"]["students_id"].items():
+    entry = student_attendance.get("entry1", {})
+    entry_time_str = entry.get("read_datetime", "")
+    serial_number = entry.get("serial_number", "")
 
-        for student_number, class_ids in enrollment_data.items():
-            if student_id not in student_number:
-                continue
-
-            sheet_id = item_data.get(student_number, {}).get('sheet_id')
-            if not sheet_id:
-                continue
-
-            sheet = client.open_by_key(sheet_id).sheet1
-            date_str = entry_time.strftime("%Y-%m-%d")
-
-            try:
-                date_col = sheet.row_values(1).index(date_str) + 1
-            except ValueError:
-                continue
-
-            for i, class_id in enumerate(class_ids.get('class_id', []), start=2):
-                course = next((c for c in courses_list if c and c.get('schedule', {}).get('class_room_id') == class_id), None)
-                if not course or course['schedule']['day'] != entry_day:
-                    sheet.update_cell(i, date_col, "×")
-                    continue
-
-                start_time_str = course['schedule']['time'].split('-')[0]
-                start_time = datetime.datetime.strptime(start_time_str, "%H:%M")
-                start_minutes = start_time.hour * 60 + start_time.minute
-
-                if abs(entry_minutes - start_minutes) <= 5:
-                    sheet.update_cell(i, date_col, "○")
-                    print(f"Marked: ○ for student {student_number} in class {course['class_name']}")
-
-students_data = get_data_from_firebase('Students')
-courses_data = get_data_from_firebase('Courses')
-
-record_attendance(students_data, courses_data)
+    if entry_time_str:
+        # Retrieve student's enrollment
+        student_enrollment = students_data["enrollment"]["student_number"].get(student_id, {}).get("class_id", [])
+        # Check if entry time matches any class schedule
+        if match_entry_with_schedule(entry_time_str, student_enrollment, courses_data):
+            # Step 6: Write "〇" in Google Sheets if entry time matches the class schedule
+            worksheet.update("B2", "〇")  # Update cell B2 with a circle
+            break  # Stop after finding the first match
