@@ -60,8 +60,16 @@ def record_attendance(students_data, courses_data):
                 start_time = datetime.datetime.strptime(start_time_str, "%H:%M")
                 start_minutes = start_time.hour * 60 + start_time.minute
 
+                print(f"Student ID: {student_id}, Class ID: {class_id}")
+                print(f"Entry Time: {entry_time_str}, Start Time: {start_time_str}")
+                print(f"Entry Minutes: {entry_minutes}, Start Minutes: {start_minutes}")
+
                 if abs(entry_minutes - start_minutes) <= 5:
                     sheet.update_cell(i, date_col, "○")
+                    print("Marked: ○")
+                else:
+                    sheet.update_cell(i, date_col, "×")
+                    print("Marked: ×")
 
 students_data = get_data_from_firebase('Students')
 courses_data = get_data_from_firebase('Courses')
