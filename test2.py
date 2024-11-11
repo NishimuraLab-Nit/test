@@ -64,8 +64,10 @@ def record_attendance(students_data, courses_data):
             # 日付の列を探す
             date_str = entry_time.strftime("%Y-%m-%d")
             header = sheet.row_values(1)
+
+            # 日付の列が見つからない場合をスキップ
             try:
-                date_col = header.index(date_str) + 1
+                date_col = header.index(date_str) + 2  # 日付+1の列を選択
             except ValueError:
                 continue
 
