@@ -55,7 +55,21 @@ def record_attendance(students_data, courses_data):
             if student_id not in student_number:
                 continue
 
-            for class_id in class_ids.get('class_id', []):
+            # Google Sheetsに接続
+            sheet_id = item_data.get(student_number, {}).get('sheet_id')
+            if not sheet_id:
+                continue
+
+            sheet = client.open_by_key(sheet_id).sheet1
+            # 日付の列を探す
+            date_str = entry_time.strftime("%Y-%m-%d")
+            header = sheet.row_values(1)
+            try:
+                date_col = header.index(date_str) + 1
+            except ValueError:
+                continue
+
+            for i, class_id in enumerate(class_ids.get('class_id', []), start=2):
                 # クラスIDに一致するコースを取得
                 course = next((c for c in courses_list if c and c.get('schedule', {}).get('class_room_id') == class_id), None)
                 if not course:
@@ -74,12 +88,8 @@ def record_attendance(students_data, courses_data):
 
                 # 入室時間が開始時間の5分以内か確認
                 if abs(entry_minutes - start_minutes) <= 5:
-                    # シートIDを取得
-                    sheet_id = item_data.get(student_number, {}).get('sheet_id')
-                    if sheet_id:
-                        # Google Sheetsに接続し、行を追加
-                        sheet = client.open_by_key(sheet_id).sheet1
-                        sheet.append_row([student_number, course['class_name'], "○"])
+                    # 合致する行に出席を記録
+                    sheet.update_cell(i, date_col, "○")
 
 # Firebaseから学生とコースのデータを取得
 students_data = get_data_from_firebase('Students')
