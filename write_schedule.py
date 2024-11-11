@@ -71,17 +71,17 @@ def main():
 
     # 変更リクエストのリストを作成
     requests = [
-        {"appendDimension": {"sheetId": 0, "dimension": "COLUMNS", "length": 30}},
+        {"appendDimension": {"sheetId": 0, "dimension": "COLUMNS", "length": 32}},
         create_dimension_request(0, "COLUMNS", 0, 1, 100),
         create_dimension_request(0, "COLUMNS", 1, 32, 35),
         create_dimension_request(0, "ROWS", 0, 1, 120),
         {"repeatCell": {"range": {"sheetId": 0}, "cell": {"userEnteredFormat": {"horizontalAlignment": "CENTER"}}, "fields": "userEnteredFormat.horizontalAlignment"}},
-        {"updateBorders": {"range": {"sheetId": 0, "startRowIndex": 0, "endRowIndex": len(class_names) + 1, "startColumnIndex": 0, "endColumnIndex": 31},
+        {"updateBorders": {"range": {"sheetId": 0, "startRowIndex": 0, "endRowIndex": 25, "startColumnIndex": 0, "endColumnIndex": 32},
                            "top": {"style": "SOLID", "width": 1},
                            "bottom": {"style": "SOLID", "width": 1},
                            "left": {"style": "SOLID", "width": 1},
                            "right": {"style": "SOLID", "width": 1}}},
-        {"setBasicFilter": {"filter": {"range": {"sheetId": 0, "startRowIndex": 0, "startColumnIndex": 0, "endRowIndex": len(class_names) + 1, "endColumnIndex": 31}}}}
+        {"setBasicFilter": {"filter": {"range": {"sheetId": 0, "startRowIndex": 0, "endRowIndex": 25, "startColumnIndex": 0, "endColumnIndex": 32}}}}
     ]
 
     # A1に「教科」を入力
@@ -93,9 +93,9 @@ def main():
     # 日付を入力と条件付き書式の設定
     japanese_weekdays = ["月", "火", "水", "木", "金", "土", "日"]
     start_date = datetime(2023, 11, 1)
-    end_row = len(class_names) + 1
+    end_row = 25
 
-    for i in range(30):
+    for i in range(31):
         date = start_date + timedelta(days=i)
         weekday = date.weekday()
         date_string = f"{date.strftime('%m')}\n月\n{date.strftime('%d')}\n日\n⌢\n{japanese_weekdays[weekday]}\n⌣"
