@@ -25,13 +25,17 @@ def create_cell_update_request(sheet_id, row_index, column_index, value):
     # セルの値を更新するリクエストを作成
     return {
         "updateCells": {
-            "rows": [{
-                "values": [{
-                    "userEnteredValue": {
-                        "stringValue": value
-                    }
-                }]
-            }],
+            "rows": [
+                {
+                    "values": [
+                        {
+                            "userEnteredValue": {
+                                "stringValue": value
+                            }
+                        }
+                    ]
+                }
+            ],
             "start": {
                 "sheetId": sheet_id,
                 "rowIndex": row_index,
@@ -58,34 +62,37 @@ def create_dimension_request(sheet_id, dimension, start_index, end_index, pixel_
         }
     }
 
-def add_conditional_formatting(requests):
-    # 土曜日と日曜日の列を色付けするルールを追加
-    colors = [
-        {"day": "SATURDAY", "color": {"red": 0.8, "green": 0.9, "blue": 1}, "col": 5},
-        {"day": "SUNDAY", "color": {"red": 1, "green": 0.8, "blue": 0.8}, "col": 6}
-    ]
-    for color in colors:
-        requests.append({
-            "addConditionalFormatRule": {
-                "rule": {
-                    "ranges": [{
-                        "sheetId": 0,
-                        "startRowIndex": 0,
-                        "endRowIndex": 1000,
-                        "startColumnIndex": color["col"],
-                        "endColumnIndex": color["col"] + 1
-                    }],
-                    "booleanRule": {
-                        "condition": {
-                            "type": "DATE_IS",
-                            "values": [{"userEnteredValue": color["day"]}]
-                        },
-                        "format": {"backgroundColor": color["color"]}
+def create_conditional_formatting_request(sheet_id, start_col, end_col, color):
+    # 条件付き書式のリクエストを作成
+    return {
+        "addConditionalFormatRule": {
+            "rule": {
+                "ranges": [
+                    {
+                        "sheetId": sheet_id,
+                        "startRowIndex": 1,
+                        "endRowIndex": 1000,  # 適用する行の範囲を指定
+                        "startColumnIndex": start_col,
+                        "endColumnIndex": end_col
                     }
-                },
-                "index": 0
-            }
-        })
+                ],
+                "booleanRule": {
+                    "condition": {
+                        "type": "CUSTOM_FORMULA",
+                        "values": [
+                            {
+                                "userEnteredValue": "TRUE"  # 全てのセルに適用
+                            }
+                        ]
+                    },
+                    "format": {
+                        "backgroundColor": color
+                    }
+                }
+            },
+            "index": 0
+        }
+    }
 
 def main():
     # Firebaseを初期化
@@ -99,16 +106,24 @@ def main():
     courses = get_firebase_data('Courses/course_id')
 
     # 履修している教科名のリストを作成
-    class_names = [courses[i]['class_name'] for i in student_class_ids if i and i < len(courses) and courses[i]]
+    class_names = [
+        courses[i]['class_name']
+        for i in student_class_ids if i and i < len(courses) and courses[i]
+    ]
 
     # 変更リクエストのリストを作成
     requests = [
+        # 列を追加
         {"appendDimension": {"sheetId": 0, "dimension": "COLUMNS", "length": 30}},
+        # 列幅と行の高さを設定
         create_dimension_request(0, "COLUMNS", 0, 1, 100),
         create_dimension_request(0, "COLUMNS", 1, 32, 35),
         create_dimension_request(0, "ROWS", 0, 1, 120),
+        # セルの中央揃え
         {"repeatCell": {"range": {"sheetId": 0}, "cell": {"userEnteredFormat": {"horizontalAlignment": "CENTER"}}, "fields": "userEnteredFormat.horizontalAlignment"}},
+        # シートの外枠を設定
         {"updateBorders": {"range": {"sheetId": 0}, "top": {"style": "SOLID", "width": 1}, "bottom": {"style": "SOLID", "width": 1}, "left": {"style": "SOLID", "width": 1}, "right": {"style": "SOLID", "width": 1}}},
+        # フィルターの設定
         {"setBasicFilter": {"filter": {"range": {"sheetId": 0, "startRowIndex": 0, "startColumnIndex": 0, "endRowIndex": 10, "endColumnIndex": 31}}}}
     ]
 
@@ -119,16 +134,27 @@ def main():
     for i, class_name in enumerate(class_names):
         requests.append(create_cell_update_request(0, i + 1, 0, class_name))
 
-    # 日付を入力
+    # 日付を入力と条件付き書式の設定
     japanese_weekdays = ["月", "火", "水", "木", "金", "土", "日"]
     start_date = datetime(2023, 11, 1)
 
+    date_requests = []
     for i in range(30):
-        date_str = (start_date + timedelta(days=i)).strftime('%m\n月\n%d\n日\n⌢\n') + japanese_weekdays[(start_date + timedelta(days=i)).weekday()] + "\n⌣"
-        requests.append(create_cell_update_request(0, 0, i + 1, date_str))
+        date = start_date + timedelta(days=i)
+        weekday = date.weekday()
+        date_string = f"{date.strftime('%m')}\n月\n{date.strftime('%d')}\n日\n⌢\n{japanese_weekdays[weekday]}\n⌣"
+        date_requests.append(create_cell_update_request(0, 0, i + 1, date_string))
 
-    # 条件付き書式を追加
-    add_conditional_formatting(requests)
+        # 土曜日の列を薄い青色に
+        if weekday == 5:
+            requests.append(create_conditional_formatting_request(0, i + 1, i + 2, {"red": 0.8, "green": 0.9, "blue": 1.0}))
+
+        # 日曜日の列を薄い赤色に
+        if weekday == 6:
+            requests.append(create_conditional_formatting_request(0, i + 1, i + 2, {"red": 1.0, "green": 0.8, "blue": 0.8}))
+
+    # リクエストを追加
+    requests.extend(date_requests)
 
     # Google Sheets APIにバッチリクエストを送信
     service_sheets.spreadsheets().batchUpdate(
