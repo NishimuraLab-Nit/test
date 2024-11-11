@@ -62,7 +62,7 @@ def create_dimension_request(sheet_id, dimension, start_index, end_index, pixel_
         }
     }
 
-def create_conditional_formatting_request(sheet_id, start_col, end_col, color, text):
+def create_conditional_formatting_request(sheet_id, start_col, end_col, start_row, end_row, color, text):
     # 条件付き書式のリクエストを作成
     return {
         "addConditionalFormatRule": {
@@ -70,8 +70,8 @@ def create_conditional_formatting_request(sheet_id, start_col, end_col, color, t
                 "ranges": [
                     {
                         "sheetId": sheet_id,
-                        "startRowIndex": 0,
-                        "endRowIndex": 1,
+                        "startRowIndex": start_row,
+                        "endRowIndex": end_row,
                         "startColumnIndex": start_col,
                         "endColumnIndex": end_col
                     }
@@ -116,7 +116,7 @@ def main():
         # 列を追加
         {"appendDimension": {"sheetId": 0, "dimension": "COLUMNS", "length": 30}},
         # 列幅と行の高さを設定
-        create_dimension_request(0, "COLUMNS", 0, 1, 100),
+        create_dimension_request(0, "COLUMNS", 0, 1, 70),
         create_dimension_request(0, "COLUMNS", 1, 32, 35),
         create_dimension_request(0, "ROWS", 0, 1, 120),
         # セルの中央揃え
@@ -145,13 +145,13 @@ def main():
         date_string = f"{date.strftime('%m')}\n月\n{date.strftime('%d')}\n日\n⌢\n{japanese_weekdays[weekday]}\n⌣"
         date_requests.append(create_cell_update_request(0, 0, i + 1, date_string))
 
-        # 土曜日の列を薄い青色に
+        # 土曜日の条件付き書式を表全体に適用
         if weekday == 5:
-            requests.append(create_conditional_formatting_request(0, i + 1, i + 2, {"red": 0.8, "green": 0.9, "blue": 1.0}, "土"))
+            requests.append(create_conditional_formatting_request(0, i + 1, i + 2, 0, 1000, {"red": 0.8, "green": 0.9, "blue": 1.0}, "土"))
 
-        # 日曜日の列を薄い赤色に
+        # 日曜日の条件付き書式を表全体に適用
         if weekday == 6:
-            requests.append(create_conditional_formatting_request(0, i + 1, i + 2, {"red": 1.0, "green": 0.8, "blue": 0.8}, "日"))
+            requests.append(create_conditional_formatting_request(0, i + 1, i + 2, 0, 1000, {"red": 1.0, "green": 0.8, "blue": 0.8}, "日"))
 
     # リクエストを追加
     requests.extend(date_requests)
