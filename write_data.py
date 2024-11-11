@@ -52,9 +52,6 @@ def update_existing_spreadsheet():
                 valueInputOption='RAW',  # 値をそのまま書き込む
                 body=body
             ).execute()
-            print(f'Spreadsheet {sheet_id} updated for student {student_id}.')  # 更新完了メッセージ
-        else:
-            print(f"Student {student_id} does not have a sheet_id.")  # シートIDがない場合のメッセージ
 
 # スプレッドシートの更新を実行
 update_existing_spreadsheet()
