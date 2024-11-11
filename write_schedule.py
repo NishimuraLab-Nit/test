@@ -147,11 +147,11 @@ def main():
 
         # 土曜日の列を薄い青色に
         if weekday == 5:
-            requests.append(create_conditional_formatting_request(0, i + 1, i + 2, {"red": 0.8, "green": 0.9, "blue": 1.0}, f"=TEXT($A$1, \"d\")=\"土\""))
+            requests.append(create_conditional_formatting_request(0, i + 1, i + 2, {"red": 0.8, "green": 0.9, "blue": 1.0}, "土"))
 
         # 日曜日の列を薄い赤色に
         if weekday == 6:
-            requests.append(create_conditional_formatting_request(0, i + 1, i + 2, {"red": 1.0, "green": 0.8, "blue": 0.8}, f"=TEXT($A$1, \"d\")=\"日\""))
+            requests.append(create_conditional_formatting_request(0, i + 1, i + 2, {"red": 1.0, "green": 0.8, "blue": 0.8}, "日"))
 
     # リクエストを追加
     requests.extend(date_requests)
