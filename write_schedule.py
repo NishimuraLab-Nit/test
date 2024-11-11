@@ -55,6 +55,17 @@ def create_conditional_formatting_request(sheet_id, start_row, end_row, start_co
         }
     }
 
+def create_gray_background_request(sheet_id, start_row, end_row, start_col, end_col):
+    # シートの範囲外のセルをグレーにするリクエストを作成
+    gray_color = {"red": 0.9, "green": 0.9, "blue": 0.9}
+    return {
+        "repeatCell": {
+            "range": {"sheetId": sheet_id, "startRowIndex": start_row, "endRowIndex": end_row, "startColumnIndex": start_col, "endColumnIndex": end_col},
+            "cell": {"userEnteredFormat": {"backgroundColor": gray_color}},
+            "fields": "userEnteredFormat.backgroundColor"
+        }
+    }
+
 def main():
     # Firebaseを初期化
     initialize_firebase()
@@ -109,6 +120,10 @@ def main():
             requests.append(create_conditional_formatting_request(0, 0, end_row, i + 1, i + 2, {"red": 0.8, "green": 0.9, "blue": 1.0}, f'=ISNUMBER(SEARCH("土", INDIRECT(ADDRESS(1, COLUMN()))))'))
         elif weekday == 6:
             requests.append(create_conditional_formatting_request(0, 0, end_row, i + 1, i + 2, {"red": 1.0, "green": 0.8, "blue": 0.8}, f'=ISNUMBER(SEARCH("日", INDIRECT(ADDRESS(1, COLUMN()))))'))
+
+    # シートの範囲外のセルをグレーにする
+    requests.append(create_gray_background_request(0, 25, 1000, 0, 32))
+    requests.append(create_gray_background_request(0, 0, 25, 32, 1000))
 
     # Google Sheets APIにバッチリクエストを送信
     service_sheets.spreadsheets().batchUpdate(spreadsheetId=sheet_id, body={'requests': requests}).execute()
