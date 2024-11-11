@@ -72,12 +72,14 @@ def record_attendance(students_data, courses_data):
                 start_time = datetime.datetime.strptime(start_time_str, "%H:%M")
                 start_minutes = start_time.hour * 60 + start_time.minute
 
-                # 入室時間と授業開始時間が5分以内であれば「○」を記録
+                # ○の条件チェック
                 if abs(entry_minutes - start_minutes) <= 5:
                     sheet.update_cell(i, date_col, "○")
                     print(f"Marked: ○ for student {student_number} in class {course['class_name']}")
                 else:
-                    sheet.update_cell(i, date_col, "×")
+                    # 条件に当てはまらない場合は処理を停止
+                    print("条件に当てはまらないため、実行を停止します。")
+                    return
 
 # Firebaseからデータを取得し、出席を記録
 students_data = get_data_from_firebase('Students')
