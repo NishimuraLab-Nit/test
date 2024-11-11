@@ -32,24 +32,29 @@ def record_attendance(students_data, courses_data):
     for student_id, attendance in attendance_data.items():
         entry_time_str = attendance.get('entry1', {}).get('read_datetime')
         
-        # 入室データがない場合は次の学生へ
+        # 入室データがない場合、エラーとして処理を停止
         if not entry_time_str:
-            continue
+            raise ValueError(f"学生 {student_id} の入室データが見つかりません。")
 
         # 入室時間の解析
         entry_time = datetime.datetime.strptime(entry_time_str, "%Y-%m-%d %H:%M:%S")
         entry_day = entry_time.strftime("%A")
         entry_minutes = entry_time.hour * 60 + entry_time.minute
 
-        # 登録された学生か確認
+        # 学生の登録クラスを確認
+        if student_id not in enrollment_data:
+            raise ValueError(f"学生 {student_id} の登録クラスが見つかりません。")
+
         for student_number, class_ids in enrollment_data.items():
             if student_id not in student_number:
-                continue
+                raise ValueError(f"学生番号 {student_id} に対応する {student_number} が見つかりません。")
 
-            # 対応するGoogleスプレッドシートを取得
+            # スプレッドシートのIDが存在するか確認
             sheet_id = item_data.get(student_number, {}).get('sheet_id')
             if not sheet_id:
-                continue
+                raise ValueError(f"学生 {student_number} に対応するスプレッドシートIDが見つかりません。")
+            
+            # スプレッドシートを取得
             sheet = client.open_by_key(sheet_id).sheet1
             date_str = entry_time.strftime("%Y-%m-%d")
 
@@ -57,15 +62,16 @@ def record_attendance(students_data, courses_data):
             try:
                 date_col = sheet.row_values(1).index(date_str) + 1
             except ValueError:
-                continue  # 日付がスプレッドシートにない場合はスキップ
+                raise ValueError(f"スプレッドシートに日付 {date_str} が見つかりません。")
 
             # クラスごとの出席記録を更新
             for i, class_id in enumerate(class_ids.get('class_id', []), start=2):
                 # クラスIDと入室日が一致する授業を検索
                 course = next((c for c in courses_list if c and c.get('schedule', {}).get('class_room_id') == class_id), None)
-                if not course or course['schedule']['day'] != entry_day:
-                    sheet.update_cell(i, date_col, "×")
-                    continue
+                if not course:
+                    raise ValueError(f"クラスID {class_id} に対応する授業が見つかりません。")
+                if course['schedule']['day'] != entry_day:
+                    raise ValueError(f"学生 {student_number} の授業 {course['class_name']} は、入室日 {entry_day} には実施されません。")
 
                 # 授業の開始時間を取得し、時間差をチェック
                 start_time_str = course['schedule']['time'].split('-')[0]
@@ -77,9 +83,13 @@ def record_attendance(students_data, courses_data):
                     sheet.update_cell(i, date_col, "○")
                     print(f"Marked: ○ for student {student_number} in class {course['class_name']}")
                 else:
-                    # 条件に当てはまらない場合は処理を停止
-                    print("条件に当てはまらないため、実行を停止します。")
-                    return
+                    # 条件に当てはまらない場合、例外を発生させて実行を停止
+                    raise ValueError(f"学生 {student_number} は授業 {course['class_name']} の出席条件を満たしていません。実行を停止します。")
+
+# Firebaseからデータを取得し、出席を記録
+students_data = get_data_from_firebase('Students')
+courses_data = get_data_from_firebase('Courses')
+record_attendance(students_data, courses_data)
 
 # Firebaseからデータを取得し、出席を記録
 students_data = get_data_from_firebase('Students')
