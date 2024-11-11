@@ -62,6 +62,75 @@ def create_dimension_request(sheet_id, dimension, start_index, end_index, pixel_
         }
     }
 
+# 土曜日の列を薄い青色に設定
+requests.append({
+    "addConditionalFormatRule": {
+        "rule": {
+            "ranges": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 0,
+                    "endRowIndex": 1000,  # 適用する行数
+                    "startColumnIndex": 5,  # 土曜日の列インデックス
+                    "endColumnIndex": 6
+                }
+            ],
+            "booleanRule": {
+                "condition": {
+                    "type": "DATE_IS",
+                    "values": [
+                        {
+                            "userEnteredValue": "SATURDAY"
+                        }
+                    ]
+                },
+                "format": {
+                    "backgroundColor": {
+                        "red": 0.8,
+                        "green": 0.9,
+                        "blue": 1
+                    }
+                }
+            }
+        },
+        "index": 0
+    }
+})
+
+# 日曜日の列を薄い赤色に設定
+requests.append({
+    "addConditionalFormatRule": {
+        "rule": {
+            "ranges": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 0,
+                    "endRowIndex": 1000,  # 適用する行数
+                    "startColumnIndex": 6,  # 日曜日の列インデックス
+                    "endColumnIndex": 7
+                }
+            ],
+            "booleanRule": {
+                "condition": {
+                    "type": "DATE_IS",
+                    "values": [
+                        {
+                            "userEnteredValue": "SUNDAY"
+                        }
+                    ]
+                },
+                "format": {
+                    "backgroundColor": {
+                        "red": 1,
+                        "green": 0.8,
+                        "blue": 0.8
+                    }
+                }
+            }
+        },
+        "index": 0
+    }
+})
 def main():
     # Firebaseを初期化
     initialize_firebase()
@@ -94,7 +163,6 @@ def main():
         # フィルターの設定
         {"setBasicFilter": {"filter": {"range": {"sheetId": 0, "startRowIndex": 0, "startColumnIndex": 0, "endRowIndex": 10, "endColumnIndex": 31}}}}
     ]
-
     # A1に「教科」を入力
     requests.append(create_cell_update_request(0, 0, 0, "教科"))
 
