@@ -94,9 +94,12 @@ def main():
     japanese_weekdays = ["月", "火", "水", "木", "金", "土", "日"]
     start_date = datetime(2023, 11, 1)
     end_row = 25
+    end_col = 32
 
     for i in range(31):
         date = start_date + timedelta(days=i)
+        if date.month != 11:
+            break
         weekday = date.weekday()
         date_string = f"{date.strftime('%m')}\n月\n{date.strftime('%d')}\n日\n⌢\n{japanese_weekdays[weekday]}\n⌣"
         requests.append(create_cell_update_request(0, 0, i + 1, date_string))
