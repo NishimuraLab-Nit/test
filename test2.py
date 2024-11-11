@@ -45,10 +45,9 @@ def record_attendance(students_data, courses_data):
 
             sheet = client.open_by_key(sheet_id).sheet1
             date_str = entry_time.strftime("%Y-%m-%d")
-            header = sheet.row_values(1)
 
             try:
-                date_col = header.index(date_str) + 2
+                date_col = sheet.row_values(1).index(date_str) + 2
             except ValueError:
                 continue
 
