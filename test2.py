@@ -54,6 +54,7 @@ def record_attendance(students_data, courses_data):
             for i, class_id in enumerate(class_ids.get('class_id', []), start=2):
                 course = next((c for c in courses_list if c and c.get('schedule', {}).get('class_room_id') == class_id), None)
                 if not course or course['schedule']['day'] != entry_day:
+                    sheet.update_cell(i, date_col, "×")
                     continue
 
                 start_time_str = course['schedule']['time'].split('-')[0]
