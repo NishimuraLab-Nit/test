@@ -75,14 +75,26 @@ def main():
     courses = get_firebase_data('Courses/course_id')
 
     if student_cource_ids is None:
-        print("No cource IDs found for the student.")
+        print("No course IDs found for the student.")
         return
 
     class_names = [courses[i]['class_name'] for i in student_cource_ids if i and i < len(courses) and courses[i]]
 
-    # 変更リクエストのリストを作成
-    requests = [
-        {"appendDimension": {"sheetId": 0, "dimension": "COLUMNS", "length": 32}},
+    # Retrieve current sheet dimensions
+    sheet_metadata = service_sheets.spreadsheets().get(spreadsheetId=sheet_id).execute()
+    sheets = sheet_metadata.get('sheets', '')
+    sheet = sheets[0]
+    grid_properties = sheet.get('properties', {}).get('gridProperties', {})
+    column_count = grid_properties.get('columnCount', 0)
+
+    # Check and adjust requests if needed
+    if column_count < 32:
+        requests = [{"appendDimension": {"sheetId": 0, "dimension": "COLUMNS", "length": 32 - column_count}}]
+    else:
+        requests = []
+
+    # Add other requests
+    requests.extend([
         create_dimension_request(0, "COLUMNS", 0, 1, 100),
         create_dimension_request(0, "COLUMNS", 1, 32, 35),
         create_dimension_request(0, "ROWS", 0, 1, 120),
@@ -93,7 +105,7 @@ def main():
                            "left": {"style": "SOLID", "width": 1},
                            "right": {"style": "SOLID", "width": 1}}},
         {"setBasicFilter": {"filter": {"range": {"sheetId": 0, "startRowIndex": 0, "endRowIndex": 25, "startColumnIndex": 0, "endColumnIndex": 32}}}}
-    ]
+    ])
 
     # A1に「教科」を入力
     requests.append(create_cell_update_request(0, 0, 0, "教科"))
@@ -106,8 +118,7 @@ def main():
     start_date = datetime(2023, 11, 1)
     end_row = 25
     end_col = 32
-    requests = []
-    
+
     # Loop through each day in November
     for i in range(31):
         date = start_date + timedelta(days=i)
@@ -118,7 +129,7 @@ def main():
         
         # Create request to update cell with date string
         requests.append(create_cell_update_request(0, 0, i + 1, date_string))
-    
+
         # Conditional formatting for Saturdays and Sundays
         if weekday == 5:  # Saturday
             requests.append(create_conditional_formatting_request(
@@ -132,11 +143,11 @@ def main():
                 {"red": 1.0, "green": 0.8, "blue": 0.8},
                 f'=ISNUMBER(SEARCH("日", INDIRECT(ADDRESS(1, COLUMN()))))'
             ))
-    
+
     # Black background for out-of-range cells
     requests.append(create_black_background_request(0, 25, 1000, 0, 1000))
     requests.append(create_black_background_request(0, 0, 1000, 32, 1000))
-    
+
     # Send batch update request to Google Sheets API
     service_sheets.spreadsheets().batchUpdate(
         spreadsheetId=sheet_id,
