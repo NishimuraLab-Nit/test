@@ -78,8 +78,8 @@ def main():
         print("No class IDs found for the student.")
         return
 
-    class_names = [courses[i]['class_name'] for i in student_class_ids if i and i < len(courses) and courses[i]］
-                   
+    class_names = [courses[i]['class_name'] for i in student_class_ids if i and i < len(courses) and courses[i]]
+
     # 変更リクエストのリストを作成
     requests = [
         {"appendDimension": {"sheetId": 0, "dimension": "COLUMNS", "length": 32}},
