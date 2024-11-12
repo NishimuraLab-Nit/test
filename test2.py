@@ -45,7 +45,10 @@ def record_attendance(students_data, courses_data):
         if student_number not in enrollment_data:
             raise ValueError(f"学生番号 {student_number} の登録クラスが見つかりません。")
 
-        class_ids = enrollment_data[student_number]['class_id']
+        class_ids = enrollment_data[student_number].get('class_id', [])
+        
+        # デバッグ: 学生情報のプリント
+        print(f"処理中の学生 {student_number}, クラス: {class_ids}")
 
         sheet_id = item_data.get(student_number, {}).get('sheet_id')
         if not sheet_id:
@@ -55,6 +58,13 @@ def record_attendance(students_data, courses_data):
 
         for i, class_id in enumerate(class_ids, start=2):
             course = next((c for c in courses_list if c and c.get('schedule', {}).get('class_room_id') == class_id), None)
+            
+            # デバッグ: クラスIDとコースのマッチング
+            if course:
+                print(f"クラスID {class_id} とコース {course['class_name']} が一致しました")
+            else:
+                print(f"クラスID {class_id} に対応するコースが見つかりません")
+
             if not course:
                 raise ValueError(f"クラスID {class_id} に対応する授業が見つかりません。")
             if course['schedule']['day'] != entry_day:
@@ -65,9 +75,8 @@ def record_attendance(students_data, courses_data):
             start_minutes = start_time.hour * 60 + start_time.minute
 
             if abs(entry_minutes - start_minutes) <= 5:
-                # Update attendance without checking date format
-                sheet.update_cell(i, 2, "○")  # Assuming column 2 is for attendance
-                print(f"Marked: ○ for student {student_number} in class {course['class_name']}")
+                sheet.update_cell(i, 2, "○")
+                print(f"出席確認: 学生 {student_number} のクラス {course['class_name']}")
             else:
                 raise ValueError(f"学生 {student_number} は授業 {course['class_name']} の出席条件を満たしていません。実行を停止します。")
 
