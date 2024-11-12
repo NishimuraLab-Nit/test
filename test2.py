@@ -37,7 +37,6 @@ def record_attendance(students_data, courses_data):
         entry_day = entry_time.strftime("%A")
         entry_minutes = entry_time.hour * 60 + entry_time.minute
 
-        # Use student_number from student info for looking up enrollment
         student_info = students_data.get('student_info', {}).get('student_id', {}).get(student_id)
         if not student_info:
             raise ValueError(f"学生 {student_id} の情報が見つかりません。")
@@ -53,12 +52,6 @@ def record_attendance(students_data, courses_data):
             raise ValueError(f"学生番号 {student_number} に対応するスプレッドシートIDが見つかりません。")
         
         sheet = client.open_by_key(sheet_id).sheet1
-        date_str = entry_time.strftime("%Y-%m-%d")
-
-        try:
-            date_col = sheet.row_values(1).index(date_str) + 1
-        except ValueError:
-            raise ValueError(f"スプレッドシートに日付 {date_str} が見つかりません。")
 
         for i, class_id in enumerate(class_ids, start=2):
             course = next((c for c in courses_list if c and c.get('schedule', {}).get('class_room_id') == class_id), None)
@@ -72,7 +65,8 @@ def record_attendance(students_data, courses_data):
             start_minutes = start_time.hour * 60 + start_time.minute
 
             if abs(entry_minutes - start_minutes) <= 5:
-                sheet.update_cell(i, date_col, "○")
+                # Update attendance without checking date format
+                sheet.update_cell(i, 2, "○")  # Assuming column 2 is for attendance
                 print(f"Marked: ○ for student {student_number} in class {course['class_name']}")
             else:
                 raise ValueError(f"学生 {student_number} は授業 {course['class_name']} の出席条件を満たしていません。実行を停止します。")
