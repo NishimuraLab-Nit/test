@@ -101,32 +101,47 @@ def main():
     # A2から教科名を入力
     requests.extend(create_cell_update_request(0, i + 1, 0, class_name) for i, class_name in enumerate(class_names))
 
-    # 日付を入力と条件付き書式の設定
+    # Initialize variables
     japanese_weekdays = ["月", "火", "水", "木", "金", "土", "日"]
     start_date = datetime(2023, 11, 1)
     end_row = 25
     end_col = 32
-
+    requests = []
+    
+    # Loop through each day in November
     for i in range(31):
         date = start_date + timedelta(days=i)
         if date.month != 11:
             break
         weekday = date.weekday()
         date_string = f"{date.strftime('%m')}\n月\n{date.strftime('%d')}\n日\n⌢\n{japanese_weekdays[weekday]}\n⌣"
+        
+        # Create request to update cell with date string
         requests.append(create_cell_update_request(0, 0, i + 1, date_string))
-
-        # 土曜日と日曜日の列を条件付き書式で全体に適用
-        if weekday == 5:
-            requests.append(create_conditional_formatting_request(0, 0, end_row, i + 1, i + 2, {"red": 0.8, "green": 0.9, "blue": 1.0}, f'=ISNUMBER(SEARCH("土", INDIRECT(ADDRESS(1, COLUMN()))))'))
-        elif weekday == 6:
-            requests.append(create_conditional_formatting_request(0, 0, end_row, i + 1, i + 2, {"red": 1.0, "green": 0.8, "blue": 0.8}, f'=ISNUMBER(SEARCH("日", INDIRECT(ADDRESS(1, COLUMN()))))'))
-
-    # シートの範囲外のセルを黒にする
+    
+        # Conditional formatting for Saturdays and Sundays
+        if weekday == 5:  # Saturday
+            requests.append(create_conditional_formatting_request(
+                0, 0, end_row, i + 1, i + 2,
+                {"red": 0.8, "green": 0.9, "blue": 1.0},
+                f'=ISNUMBER(SEARCH("土", INDIRECT(ADDRESS(1, COLUMN()))))'
+            ))
+        elif weekday == 6:  # Sunday
+            requests.append(create_conditional_formatting_request(
+                0, 0, end_row, i + 1, i + 2,
+                {"red": 1.0, "green": 0.8, "blue": 0.8},
+                f'=ISNUMBER(SEARCH("日", INDIRECT(ADDRESS(1, COLUMN()))))'
+            ))
+    
+    # Black background for out-of-range cells
     requests.append(create_black_background_request(0, 25, 1000, 0, 1000))
     requests.append(create_black_background_request(0, 0, 1000, 32, 1000))
-
-    # Google Sheets APIにバッチリクエストを送信
-    service_sheets.spreadsheets().batchUpdate(spreadsheetId=sheet_id, body={'requests': requests}).execute()
+    
+    # Send batch update request to Google Sheets API
+    service_sheets.spreadsheets().batchUpdate(
+        spreadsheetId=sheet_id,
+        body={'requests': requests}
+    ).execute()
 
 if __name__ == "__main__":
     main()
