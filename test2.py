@@ -57,7 +57,7 @@ def record_attendance(students_data, courses_data):
         
         sheet = client.open_by_key(sheet_id).sheet1
 
-        for i, course_id in enumerate(course_ids, start=1):
+        for course_id in course_ids:
             course = courses_list[course_id]
             if not course:
                 raise ValueError(f"コースID {course_id} に対応する授業が見つかりません。")
@@ -69,8 +69,12 @@ def record_attendance(students_data, courses_data):
             start_minutes = start_time.hour * 60 + start_time.minute
         
             if abs(entry_minutes - start_minutes) <= 5:
-                sheet.update_cell(i, 2, "○")
+                # Calculate the correct cell position
+                row = course_id + 1
+                column = entry_time.day + 1
+                sheet.update_cell(row, column, "○")
                 print(f"出席確認: 学生 {student_number} のクラス {course['class_name']}")
+                break  # Exit the loop after marking attendance
             else:
                 raise ValueError(f"学生 {student_number} は授業 {course['class_name']} の出席条件を満たしていません。実行を停止します。")
 
