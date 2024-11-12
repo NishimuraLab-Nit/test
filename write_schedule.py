@@ -64,10 +64,10 @@ def main():
     service_sheets = get_google_sheets_service()
 
     sheet_id = get_firebase_data('Students/item/student_number/e19139/sheet_id')
-    student_class_ids = get_firebase_data('Students/enrollment/student_number/e19139/class_id')
+    student_course_ids = get_firebase_data('Students/enrollment/student_number/e19139/course_id')
     courses = get_firebase_data('Courses/course_id')
 
-    class_names = [courses[i]['class_name'] for i in student_class_ids if i and i < len(courses) and courses[i]]
+    class_names = [courses[i]['class_name'] for i in student_course_ids if i and i < len(courses) and courses[i]]
 
     requests = [
         {"appendDimension": {"sheetId": 0, "dimension": "COLUMNS", "length": 32}},
