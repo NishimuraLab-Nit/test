@@ -74,8 +74,8 @@ def main():
     student_cource_ids = get_firebase_data('Students/enrollment/student_number/e19139/cource_id')
     courses = get_firebase_data('Courses/course_id')
 
-    if student_class_ids is None:
-        print("No class IDs found for the student.")
+    if student_cource_ids is None:
+        print("No cource IDs found for the student.")
         return
 
     class_names = [courses[i]['class_name'] for i in student_cource_ids if i and i < len(courses) and courses[i]]
