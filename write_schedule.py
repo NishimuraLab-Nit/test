@@ -67,19 +67,19 @@ def create_black_background_request(sheet_id, start_row, end_row, start_col, end
     }
 
 def main():
-    # Firebaseを初期化
     initialize_firebase()
-    # Google Sheetsサービスを取得
     service_sheets = get_google_sheets_service()
 
-    # Firebaseから必要なデータを取得
     sheet_id = get_firebase_data('Students/item/student_number/e19139/sheet_id')
     student_class_ids = get_firebase_data('Students/enrollment/student_number/e19139/class_id')
     courses = get_firebase_data('Courses/course_id')
 
-    # 履修している教科名のリストを作成
-    class_names = [courses[i]['class_name'] for i in student_class_ids if i and i < len(courses) and courses[i]]
+    if student_class_ids is None:
+        print("No class IDs found for the student.")
+        return
 
+    class_names = [courses[i]['class_name'] for i in student_class_ids if i and i < len(courses) and courses[i]］
+                   
     # 変更リクエストのリストを作成
     requests = [
         {"appendDimension": {"sheetId": 0, "dimension": "COLUMNS", "length": 32}},
