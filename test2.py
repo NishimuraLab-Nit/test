@@ -58,16 +58,16 @@ def record_attendance(students_data, courses_data):
         sheet = client.open_by_key(sheet_id).sheet1
 
         for i, course_id in enumerate(course_ids, start=1):
-            course = next((c for c in courses_list if c and c.get('schedule', {}).get('serial_number') == course_id), None)
+            course = courses_list[course_id]
             if not course:
                 raise ValueError(f"コースID {course_id} に対応する授業が見つかりません。")
             if course['schedule']['day'] != entry_day:
                 raise ValueError(f"学生 {student_number} の授業 {course['class_name']} は、入室日 {entry_day} には実施されません。")
-
+        
             start_time_str = course['schedule']['time'].split('-')[0]
             start_time = datetime.datetime.strptime(start_time_str, "%H:%M")
             start_minutes = start_time.hour * 60 + start_time.minute
-
+        
             if abs(entry_minutes - start_minutes) <= 5:
                 sheet.update_cell(i, 2, "○")
                 print(f"出席確認: 学生 {student_number} のクラス {course['class_name']}")
