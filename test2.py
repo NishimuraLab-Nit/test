@@ -21,7 +21,6 @@ def get_data_from_firebase(path):
     ref = db.reference(path)
     return ref.get()
 
-
 def record_attendance(students_data, courses_data):
     attendance_data = students_data.get('attendance', {}).get('students_id', {})
     enrollment_data = students_data.get('enrollment', {}).get('student_number', {})
@@ -46,11 +45,11 @@ def record_attendance(students_data, courses_data):
         if student_number not in enrollment_data:
             raise ValueError(f"学生番号 {student_number} の登録クラスが見つかりません。")
 
-        # クラスIDの取得
-        class_ids = [cid for cid in enrollment_data[student_number].get('class_id', []) if cid is not None]
+        # コースIDの取得
+        course_ids = [cid for cid in enrollment_data[student_number].get('cource_id', []) if cid is not None]
         
         # デバッグ: 学生のクラスIDをプリント
-        print(f"学生 {student_number} のクラスID: {class_ids}")
+        print(f"学生 {student_number} のコースID: {course_ids}")
 
         sheet_id = item_data.get(student_number, {}).get('sheet_id')
         if not sheet_id:
@@ -58,10 +57,10 @@ def record_attendance(students_data, courses_data):
         
         sheet = client.open_by_key(sheet_id).sheet1
 
-        for i, class_id in enumerate(class_ids, start=2):
-            course = next((c for c in courses_list if c and c.get('schedule', {}).get('class_room_id') == class_id), None)
+        for i, course_id in enumerate(course_ids, start=1):
+            course = next((c for c in courses_list if c and c.get('schedule', {}).get('serial_number') == course_id), None)
             if not course:
-                raise ValueError(f"クラスID {class_id} に対応する授業が見つかりません。")
+                raise ValueError(f"コースID {course_id} に対応する授業が見つかりません。")
             if course['schedule']['day'] != entry_day:
                 raise ValueError(f"学生 {student_number} の授業 {course['class_name']} は、入室日 {entry_day} には実施されません。")
 
