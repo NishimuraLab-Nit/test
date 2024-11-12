@@ -1,26 +1,3 @@
-import datetime
-import firebase_admin
-from firebase_admin import credentials, db
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-
-# Firebaseアプリの初期化（未初期化の場合のみ実行）
-if not firebase_admin._apps:
-    cred = credentials.Certificate('/tmp/firebase_service_account.json')
-    firebase_admin.initialize_app(cred, {
-        'databaseURL': 'https://test-51ebc-default-rtdb.firebaseio.com/'
-    })
-
-# Google Sheets API用のスコープを設定
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name('/tmp/gcp_service_account.json', scope)
-client = gspread.authorize(creds)
-
-# Firebaseからデータを取得する関数
-def get_data_from_firebase(path):
-    ref = db.reference(path)
-    return ref.get()
-
 def record_attendance(students_data, courses_data):
     attendance_data = students_data.get('attendance', {}).get('students_id', {})
     enrollment_data = students_data.get('enrollment', {}).get('student_number', {})
@@ -45,10 +22,11 @@ def record_attendance(students_data, courses_data):
         if student_number not in enrollment_data:
             raise ValueError(f"学生番号 {student_number} の登録クラスが見つかりません。")
 
-        class_ids = enrollment_data[student_number].get('class_id', [])
+        # クラスIDの取得
+        class_ids = [cid for cid in enrollment_data[student_number].get('class_id', []) if cid is not None]
         
-        # デバッグ: 学生情報のプリント
-        print(f"処理中の学生 {student_number}, クラス: {class_ids}")
+        # デバッグ: 学生のクラスIDをプリント
+        print(f"学生 {student_number} のクラスID: {class_ids}")
 
         sheet_id = item_data.get(student_number, {}).get('sheet_id')
         if not sheet_id:
@@ -58,13 +36,6 @@ def record_attendance(students_data, courses_data):
 
         for i, class_id in enumerate(class_ids, start=2):
             course = next((c for c in courses_list if c and c.get('schedule', {}).get('class_room_id') == class_id), None)
-            
-            # デバッグ: クラスIDとコースのマッチング
-            if course:
-                print(f"クラスID {class_id} とコース {course['class_name']} が一致しました")
-            else:
-                print(f"クラスID {class_id} に対応するコースが見つかりません")
-
             if not course:
                 raise ValueError(f"クラスID {class_id} に対応する授業が見つかりません。")
             if course['schedule']['day'] != entry_day:
