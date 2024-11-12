@@ -21,7 +21,6 @@ def get_data_from_firebase(path):
     ref = db.reference(path)
     return ref.get()
 
-# 出席記録をGoogleスプレッドシートに更新する関数
 def record_attendance(students_data, courses_data):
     attendance_data = students_data.get('attendance', {}).get('students_id', {})
     enrollment_data = students_data.get('enrollment', {}).get('student_number', {})
@@ -38,17 +37,20 @@ def record_attendance(students_data, courses_data):
         entry_day = entry_time.strftime("%A")
         entry_minutes = entry_time.hour * 60 + entry_time.minute
 
-        # Find student_number associated with student_id
-        student_number = next((num for num, data in item_data.items() if data.get('student_id') == student_id), None)
+        # Use student_number from student info for looking up enrollment
+        student_info = students_data.get('student_info', {}).get('student_id', {}).get(student_id)
+        if not student_info:
+            raise ValueError(f"学生 {student_id} の情報が見つかりません。")
         
-        if not student_number:
-            raise ValueError(f"学生 {student_id} の登録クラスが見つかりません。")
+        student_number = student_info.get('student_number')
+        if student_number not in enrollment_data:
+            raise ValueError(f"学生番号 {student_number} の登録クラスが見つかりません。")
 
-        class_ids = enrollment_data.get(student_number, {}).get('class_id', [])
-        
+        class_ids = enrollment_data[student_number]['class_id']
+
         sheet_id = item_data.get(student_number, {}).get('sheet_id')
         if not sheet_id:
-            raise ValueError(f"学生 {student_number} に対応するスプレッドシートIDが見つかりません。")
+            raise ValueError(f"学生番号 {student_number} に対応するスプレッドシートIDが見つかりません。")
         
         sheet = client.open_by_key(sheet_id).sheet1
         date_str = entry_time.strftime("%Y-%m-%d")
