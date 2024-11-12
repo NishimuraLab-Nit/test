@@ -1,3 +1,27 @@
+import datetime
+import firebase_admin
+from firebase_admin import credentials, db
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+
+# Firebaseアプリの初期化（未初期化の場合のみ実行）
+if not firebase_admin._apps:
+    cred = credentials.Certificate('/tmp/firebase_service_account.json')
+    firebase_admin.initialize_app(cred, {
+        'databaseURL': 'https://test-51ebc-default-rtdb.firebaseio.com/'
+    })
+
+# Google Sheets API用のスコープを設定
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+creds = ServiceAccountCredentials.from_json_keyfile_name('/tmp/gcp_service_account.json', scope)
+client = gspread.authorize(creds)
+
+# Firebaseからデータを取得する関数
+def get_data_from_firebase(path):
+    ref = db.reference(path)
+    return ref.get()
+
+
 def record_attendance(students_data, courses_data):
     attendance_data = students_data.get('attendance', {}).get('students_id', {})
     enrollment_data = students_data.get('enrollment', {}).get('student_number', {})
