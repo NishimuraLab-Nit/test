@@ -67,7 +67,15 @@ def main():
     student_course_ids = get_firebase_data('Students/enrollment/student_number/e19139/course_id')
     courses = get_firebase_data('Courses/course_id')
 
-    class_names = [courses[i]['class_name'] for i in student_course_ids if i and i < len(courses) and courses[i]]
+    if not student_course_ids:
+        print("No course IDs found for the student.")
+        return
+
+    if not courses:
+        print("No courses found in the database.")
+        return
+
+    class_names = [courses[i]['class_name'] for i in student_course_ids if i in courses and 'class_name' in courses[i]]
 
     requests = [
         {"appendDimension": {"sheetId": 0, "dimension": "COLUMNS", "length": 32}},
