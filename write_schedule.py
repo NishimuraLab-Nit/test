@@ -71,7 +71,7 @@ def main():
     service_sheets = get_google_sheets_service()
 
     sheet_id = get_firebase_data('Students/item/student_number/e19139/sheet_id')
-    student_class_ids = get_firebase_data('Students/enrollment/student_number/e19139/class_id')
+    student_cource_ids = get_firebase_data('Students/enrollment/student_number/e19139/cource_id')
     courses = get_firebase_data('Courses/course_id')
 
     if student_class_ids is None:
