@@ -101,7 +101,7 @@ def prepare_update_requests(sheet_id, class_names):
 
     for i in range(31):
         date = start_date + timedelta(days=i)
-        if date.month != 12:
+        if date.month != 11:
             break
         weekday = date.weekday()
         date_string = f"{date.strftime('%m')}\n月\n{date.strftime('%d')}\n日\n⌢\n{japanese_weekdays[weekday]}\n⌣"
