@@ -32,4 +32,4 @@ jobs:
         echo "$GCP_SERVICE_ACCOUNT" > /tmp/gcp_service_account.json
 
     - name: Run script
-      run: python write_attesndance.py
+      run: python write_attendance.py
