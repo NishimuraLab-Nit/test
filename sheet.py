@@ -36,7 +36,7 @@ def create_spreadsheet():
         if student_data is None:
             raise ValueError("Student data not found in Firebase.")
 
-        cource_id = student_data['cource_id'][0]
+        course_id = student_data['course_id'][0]
 
         spreadsheet = {
             'properties': {'title': student_number}
