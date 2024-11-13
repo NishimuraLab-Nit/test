@@ -152,14 +152,17 @@ def main():
     if not student_course_ids or not isinstance(student_course_ids, list):
         print("No valid course IDs found for the student or the data is not in expected list format.")
         return
-    if not courses or not isinstance(courses, dict):
-        print("No valid courses found in the database or the data is not in expected dictionary format.")
+    if not courses or not isinstance(courses, list):
+        print("No valid courses found in the database or the data is not in expected list format.")
         return
+
+    # coursesリストを辞書に変換（インデックスをキーにする）
+    courses_dict = {i: course for i, course in enumerate(courses) if course}
 
     # クラス名のリストを作成
     class_names = [
-        courses[course_id]['class_name'] for course_id in student_course_ids
-        if course_id in courses and 'class_name' in courses[course_id]
+        courses_dict[course_id]['class_name'] for course_id in student_course_ids
+        if course_id in courses_dict and 'class_name' in courses_dict[course_id]
     ]
 
     # シートの更新リクエストを準備
@@ -170,6 +173,7 @@ def main():
         spreadsheetId=sheet_id,
         body={'requests': requests}
     ).execute()
+
 
 
 
