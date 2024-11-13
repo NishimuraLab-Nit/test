@@ -6,22 +6,33 @@ from datetime import datetime, timedelta
 
 def initialize_firebase():
     """Firebaseを初期化してデータベースに接続します。"""
-    firebase_cred = credentials.Certificate("firebase-adminsdk.json")
-    initialize_app(firebase_cred, {
-        'databaseURL': 'https://test-51ebc-default-rtdb.firebaseio.com/'
-    })
+    try:
+        firebase_cred = credentials.Certificate("firebase-adminsdk.json")
+        initialize_app(firebase_cred, {
+            'databaseURL': 'https://test-51ebc-default-rtdb.firebaseio.com/'
+        })
+    except Exception as e:
+        print(f"Failed to initialize Firebase: {e}")
 
 
 def get_google_sheets_service():
     """Google Sheets APIサービスを初期化して返します。"""
-    scopes = ['https://www.googleapis.com/auth/spreadsheets']
-    google_creds = Credentials.from_service_account_file("google-credentials.json", scopes=scopes)
-    return build('sheets', 'v4', credentials=google_creds)
+    try:
+        scopes = ['https://www.googleapis.com/auth/spreadsheets']
+        google_creds = Credentials.from_service_account_file("google-credentials.json", scopes=scopes)
+        return build('sheets', 'v4', credentials=google_creds)
+    except Exception as e:
+        print(f"Failed to initialize Google Sheets service: {e}")
+        return None
 
 
 def get_firebase_data(ref_path):
     """Firebaseから指定されたリファレンスパスのデータを取得します。"""
-    return db.reference(ref_path).get()
+    try:
+        return db.reference(ref_path).get()
+    except Exception as e:
+        print(f"Failed to retrieve data from Firebase for path '{ref_path}': {e}")
+        return None
 
 
 def create_cell_update_request(sheet_id, row_index, column_index, value):
@@ -75,10 +86,13 @@ def create_black_background_request(sheet_id, start_row, end_row, start_col, end
         }
     }
 
-def prepare_update_requests(sheet_id, class_names):
-    """Google Sheetsへの更新リクエストリストを作成する関数です。"""
 
-    # 基本的なシート設定のリクエスト
+def prepare_update_requests(sheet_id, class_names):
+    """シートの更新リクエストリストを作成します。"""
+    if not class_names:
+        print("Class names list is empty. Check data retrieved from Firebase.")
+        return []
+
     requests = [
         {"appendDimension": {"sheetId": 0, "dimension": "COLUMNS", "length": 32}},
         create_dimension_request(0, "COLUMNS", 0, 1, 100),
@@ -97,42 +111,38 @@ def prepare_update_requests(sheet_id, class_names):
                                                  "startColumnIndex": 0, "endColumnIndex": 32}}}}
     ]
 
-    # 教科名のリストをシートに追加
+    # 教科データを入力
     requests.append(create_cell_update_request(0, 0, 0, "教科"))
     requests.extend(create_cell_update_request(0, i + 1, 0, class_name) for i, class_name in enumerate(class_names))
 
-    # 11月の各日付と曜日を記入
+    # 12月の日付と曜日を設定
     japanese_weekdays = ["月", "火", "水", "木", "金", "土", "日"]
-    start_date = datetime(2023, 11, 1)  # 11月1日開始
+    start_date = datetime(2023, 12, 1)  # 12月1日を開始日に設定
     end_row = 25
 
-    for i in range(30):  # 最大30日まで記入
+    for i in range(31):  # 最大31日分を表示
         date = start_date + timedelta(days=i)
-        
-        # 11月のみ対象とする
-        if date.month != 11:
+        if date.month != 12:
             break
-        
-        # 曜日を日本語表記で取得（インデックスを月曜日=5として調整）
-        weekday_index = (date.weekday() + 5) % 7  # 月曜日が5になるように調整
-        date_string = f"{date.strftime('%m')}月\n{date.strftime('%d')}日\n⌢\n{japanese_weekdays[weekday_index]}\n⌣"
+        weekday = date.weekday()
+        date_string = f"{date.strftime('%m')}\n月\n{date.strftime('%d')}\n日\n⌢\n{japanese_weekdays[weekday]}\n⌣"
         requests.append(create_cell_update_request(0, 0, i + 1, date_string))
 
-        # 土日ごとに色付き条件付きフォーマットを追加
-        if weekday_index == 6:  # 土曜日
+        # 土日の条件付き書式を追加
+        if weekday == 5:  # 土曜日
             requests.append(create_conditional_formatting_request(
                 0, 0, end_row, i + 1, i + 2,
                 {"red": 0.8, "green": 0.9, "blue": 1.0},
                 f'=ISNUMBER(SEARCH("土", INDIRECT(ADDRESS(1, COLUMN()))))'
             ))
-        elif weekday_index == 0:  # 日曜日
+        elif weekday == 6:  # 日曜日
             requests.append(create_conditional_formatting_request(
                 0, 0, end_row, i + 1, i + 2,
                 {"red": 1.0, "green": 0.8, "blue": 0.8},
                 f'=ISNUMBER(SEARCH("日", INDIRECT(ADDRESS(1, COLUMN()))))'
             ))
 
-    # 黒の背景を追加（シートの下部と右側に余分なセルがある場合の対応）
+    # 黒の背景を追加
     requests.append(create_black_background_request(0, 25, 1000, 0, 1000))
     requests.append(create_black_background_request(0, 0, 1000, 32, 1000))
 
@@ -142,6 +152,9 @@ def prepare_update_requests(sheet_id, class_names):
 def main():
     initialize_firebase()
     sheets_service = get_google_sheets_service()
+    if sheets_service is None:
+        print("Google Sheets service could not be initialized.")
+        return
 
     # Firebaseからデータを取得
     sheet_id = get_firebase_data('Students/item/student_number/e19139/sheet_id')
@@ -153,7 +166,10 @@ def main():
     print("Student Course IDs:", student_course_ids)
     print("Courses:", courses)
 
-    # student_course_idsとcoursesの型と内容をチェック
+    # データの存在チェック
+    if not sheet_id:
+        print("Sheet ID not found.")
+        return
     if not student_course_ids or not isinstance(student_course_ids, list):
         print("No valid course IDs found for the student or the data is not in expected list format.")
         return
@@ -172,15 +188,21 @@ def main():
 
     # シートの更新リクエストを準備
     requests = prepare_update_requests(sheet_id, class_names)
+    if not requests:
+        print("No requests to update the sheet.")
+        return
 
     # Google Sheets APIでリクエストを送信
-    sheets_service.spreadsheets().batchUpdate(
-        spreadsheetId=sheet_id,
-        body={'requests': requests}
-    ).execute()
-
-
+    try:
+        sheets_service.spreadsheets().batchUpdate(
+            spreadsheetId=sheet_id,
+            body={'requests': requests}
+        ).execute()
+        print("Sheet updated successfully.")
+    except Exception as e:
+        print(f"Failed to update the sheet: {e}")
 
 
 if __name__ == "__main__":
     main()
+
