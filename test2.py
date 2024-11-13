@@ -46,7 +46,7 @@ def record_attendance(students_data, courses_data):
             raise ValueError(f"学生番号 {student_number} の登録クラスが見つかりません。")
 
         # コースIDの取得
-        course_ids = [cid for cid in enrollment_data[student_number].get('cource_id', []) if cid is not None]
+        course_ids = [cid for cid in enrollment_data[student_number].get('course_id', []) if cid is not None]
         
         # デバッグ: 学生のクラスIDをプリント
         print(f"学生 {student_number} のコースID: {course_ids}")
@@ -73,7 +73,7 @@ def record_attendance(students_data, courses_data):
                 row = course_id + 1
                 column = entry_time.day + 1
                 sheet.update_cell(row, column, "○")
-                print(f"出席確認: 学生 {student_number} のクラス {course['class_name']}")
+                print(f"出席確認: 学生 {student_number} のコース {course['class_name']}")
                 break  # Exit the loop after marking attendance
             else:
                 raise ValueError(f"学生 {student_number} は授業 {course['class_name']} の出席条件を満たしていません。実行を停止します。")
