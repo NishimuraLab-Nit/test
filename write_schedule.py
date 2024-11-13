@@ -111,7 +111,7 @@ def prepare_update_requests(sheet_id, class_names):
         date = start_date + timedelta(days=i)
         if date.month != 12:
             break
-        weekday = date.weekday()
+        weekday = date.weekday()  # 月曜日=0, 日曜日=6の形式でインデックスを取得
         date_string = f"{date.strftime('%m')}\n月\n{date.strftime('%d')}\n日\n⌢\n{japanese_weekdays[weekday]}\n⌣"
         requests.append(create_cell_update_request(0, 0, i + 1, date_string))
 
@@ -134,8 +134,6 @@ def prepare_update_requests(sheet_id, class_names):
     requests.append(create_black_background_request(0, 0, 1000, 32, 1000))
 
     return requests
-
-
 
 def main():
     initialize_firebase()
