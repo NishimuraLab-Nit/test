@@ -79,7 +79,9 @@ def create_black_background_request(sheet_id, start_row, end_row, start_col, end
 from datetime import datetime, timedelta
 
 def prepare_update_requests(sheet_id, class_names):
-    """シートの更新リクエストリストを作成します。"""
+    """Google Sheetsへの更新リクエストリストを作成する関数です。"""
+    
+    # 基本的なシート設定のリクエスト
     requests = [
         {"appendDimension": {"sheetId": 0, "dimension": "COLUMNS", "length": 32}},
         create_dimension_request(0, "COLUMNS", 0, 1, 100),
@@ -98,24 +100,28 @@ def prepare_update_requests(sheet_id, class_names):
                                                  "startColumnIndex": 0, "endColumnIndex": 32}}}}
     ]
 
-    # 教科データを入力
+    # 教科名のリストをシートに追加
     requests.append(create_cell_update_request(0, 0, 0, "教科"))
     requests.extend(create_cell_update_request(0, i + 1, 0, class_name) for i, class_name in enumerate(class_names))
 
-    # 12月の日付と曜日を設定
+    # 12月の各日付と曜日を記入
     japanese_weekdays = ["月", "火", "水", "木", "金", "土", "日"]
-    start_date = datetime(2023, 12, 1)  # 12月1日を開始日に設定
+    start_date = datetime(2023, 12, 1)  # 12月1日開始
     end_row = 25
 
-    for i in range(31):  # 最大31日分を表示
+    for i in range(31):  # 最大31日まで記入
         date = start_date + timedelta(days=i)
+        
+        # 12月のみ対象とする
         if date.month != 12:
             break
-        weekday = date.weekday()  # 月曜日=0, 日曜日=6の形式でインデックスを取得
-        date_string = f"{date.strftime('%m')}\n月\n{date.strftime('%d')}\n日\n⌢\n{japanese_weekdays[weekday]}\n⌣"
+        
+        # 曜日を日本語表記で取得
+        weekday = date.weekday()  # 0=月曜日, 6=日曜日
+        date_string = f"{date.strftime('%m')}月\n{date.strftime('%d')}日\n⌢\n{japanese_weekdays[weekday]}\n⌣"
         requests.append(create_cell_update_request(0, 0, i + 1, date_string))
 
-        # 土日の条件付き書式を追加
+        # 土日ごとに色付き条件付きフォーマットを追加
         if weekday == 5:  # 土曜日
             requests.append(create_conditional_formatting_request(
                 0, 0, end_row, i + 1, i + 2,
@@ -129,11 +135,12 @@ def prepare_update_requests(sheet_id, class_names):
                 f'=ISNUMBER(SEARCH("日", INDIRECT(ADDRESS(1, COLUMN()))))'
             ))
 
-    # 黒の背景を追加
+    # 黒の背景を追加（シートの下部と右側に余分なセルがある場合の対応）
     requests.append(create_black_background_request(0, 25, 1000, 0, 1000))
     requests.append(create_black_background_request(0, 0, 1000, 32, 1000))
 
     return requests
+
 
 def main():
     initialize_firebase()
