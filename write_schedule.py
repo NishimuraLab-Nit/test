@@ -104,7 +104,7 @@ def prepare_update_requests(sheet_id, class_names):
     requests.append(create_cell_update_request(0, 0, 0, "教科"))
     requests.extend(create_cell_update_request(0, i + 1, 0, class_name) for i, class_name in enumerate(class_names))
 
-    # 12月の各日付と曜日を記入
+    # 12月の日付と曜日を記入
     japanese_weekdays = ["月", "火", "水", "木", "金", "土", "日"]
     start_date = datetime(2023, 12, 1)  # 12月1日開始
     end_row = 25
@@ -116,19 +116,19 @@ def prepare_update_requests(sheet_id, class_names):
         if date.month != 12:
             break
         
-        # 曜日を日本語表記で取得（インデックスを月曜日=4として調整）
-        weekday_index = (date.weekday() + 4) % 7  # 月曜日が4になるように調整
-        date_string = f"{date.strftime('%m')}月\n{date.strftime('%d')}日\n⌢\n{japanese_weekdays[weekday_index]}\n⌣"
+        # 曜日を日本語表記で取得（インデックスを月曜日=5として調整）
+        weekday_index = (date.weekday() + 5) % 7  # 月曜日が5になるように調整
+        date_string = f"{date.strftime('%m')}\n月\n{date.strftime('%d')}\n日\n⌢\n{japanese_weekdays[weekday_index]}\n⌣"
         requests.append(create_cell_update_request(0, 0, i + 1, date_string))
 
         # 土日ごとに色付き条件付きフォーマットを追加
-        if weekday_index == 5:  # 土曜日
+        if weekday_index == 6:  # 土曜日
             requests.append(create_conditional_formatting_request(
                 0, 0, end_row, i + 1, i + 2,
                 {"red": 0.8, "green": 0.9, "blue": 1.0},
                 f'=ISNUMBER(SEARCH("土", INDIRECT(ADDRESS(1, COLUMN()))))'
             ))
-        elif weekday_index == 6:  # 日曜日
+        elif weekday_index == 0:  # 日曜日
             requests.append(create_conditional_formatting_request(
                 0, 0, end_row, i + 1, i + 2,
                 {"red": 1.0, "green": 0.8, "blue": 0.8},
@@ -140,6 +140,7 @@ def prepare_update_requests(sheet_id, class_names):
     requests.append(create_black_background_request(0, 0, 1000, 32, 1000))
 
     return requests
+
 
 
 
