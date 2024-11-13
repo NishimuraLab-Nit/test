@@ -143,16 +143,24 @@ def main():
     student_course_ids = get_firebase_data('Students/enrollment/student_number/e19139/course_id')
     courses = get_firebase_data('Courses/course_id')
 
-    if not student_course_ids:
-        print("No course IDs found for the student.")
+    # デバッグ用に取得したデータの構造を出力
+    print("Sheet ID:", sheet_id)
+    print("Student Course IDs:", student_course_ids)
+    print("Courses:", courses)
+
+    # student_course_idsとcoursesの型と内容をチェック
+    if not student_course_ids or not isinstance(student_course_ids, list):
+        print("No valid course IDs found for the student or the data is not in expected list format.")
         return
-    if not courses:
-        print("No courses found in the database.")
+    if not courses or not isinstance(courses, dict):
+        print("No valid courses found in the database or the data is not in expected dictionary format.")
         return
 
     # クラス名のリストを作成
-    class_names = [courses[course_id]['class_name'] for course_id in student_course_ids
-                   if course_id in courses and 'class_name' in courses[course_id]]
+    class_names = [
+        courses[course_id]['class_name'] for course_id in student_course_ids
+        if course_id in courses and 'class_name' in courses[course_id]
+    ]
 
     # シートの更新リクエストを準備
     requests = prepare_update_requests(sheet_id, class_names)
@@ -162,6 +170,7 @@ def main():
         spreadsheetId=sheet_id,
         body={'requests': requests}
     ).execute()
+
 
 
 if __name__ == "__main__":
